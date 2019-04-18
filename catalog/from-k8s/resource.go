@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"os"
+	"net"
 
 	"github.com/hashicorp/consul-k8s/helper/controller"
 	consulapi "github.com/hashicorp/consul/api"
@@ -249,12 +251,16 @@ func (t *ServiceResource) generateRegistrations(key string) {
 	// baseNode and baseService are the base that should be modified with
 	// service-type specific changes. These are not pointers, they should be
 	// shallow copied for each instance.
+  hostname, _ := os.Hostname()
+  addrs, _ := net.LookupHost(hostname)
 	baseNode := consulapi.CatalogRegistration{
-		SkipNodeUpdate: true,
+		SkipNodeUpdate: false,
 		Node:           "k8s-sync",
 		Address:        "127.0.0.1",
 		NodeMeta: map[string]string{
 			ConsulSourceKey: ConsulSourceValue,
+      "hostname": hostname,
+      "nodeIP": addrs[0],
 		},
 	}
 
